@@ -30,7 +30,7 @@ def generate_ad(property_description):
     ad_text = response.choices[0].message.content.strip()
 print("Attempting Supabase insert...")
 
-    supabase.table("status_logs").insert({
+    base.table("status_logs").insert({
         "agent_name": "RetailBoost-AI",
         "message": f"Generated ad for: {property_description[:50]}...",
         "timestamp": datetime.utcnow().isoformat()
