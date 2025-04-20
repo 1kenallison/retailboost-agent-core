@@ -9,6 +9,8 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+print(f"SUPABASE_URL: {SUPABASE_URL}")
+print(f"SUPABASE_KEY: {SUPABASE_KEY[:8]}")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -26,11 +28,14 @@ def generate_ad(property_description):
     )
 
     ad_text = response.choices[0].message.content.strip()
+print("Attempting Supabase insert...")
 
     supabase.table("status_logs").insert({
         "agent_name": "RetailBoost-AI",
         "message": f"Generated ad for: {property_description[:50]}...",
         "timestamp": datetime.utcnow().isoformat()
     }).execute()
+print("Insert successful.")
+
 
     return ad_text
