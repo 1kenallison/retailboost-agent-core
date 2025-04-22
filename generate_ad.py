@@ -28,14 +28,20 @@ def generate_ad(property_description):
     )
 
     ad_text = response.choices[0].message.content.strip()
-print("Attempting Supabase insert...")
+    print("Generated Ad:", ad_text)
 
-    base    table("status_logs").insert({
-        "ag    nt_name": "RetailBoost-AI",
-            message": f"Generated ad for: {property_description[:50]}...",
-        "times    amp": datetime.utcnow().isoformat()
+    print("Attempting Supabase insert...")
+    supabase.table("status_logs").insert({
+        "agent_name": "RetailBoost-AI",
+        "message": ad_text,
+        "timestamp": datetime.utcnow().isoformat()
     }).execute()
-print("Insert successful.")
-
+    print("Insert successful.")
 
     return ad_text
+
+
+# TEST EXECUTION: Optional
+if __name__ == "__main__":
+    test_prompt = "Charming 3-bedroom home with a fully remodeled kitchen, fenced yard, and walkable to top-rated schools."
+    generate_ad(test_prompt)
