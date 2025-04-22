@@ -1,47 +1,34 @@
 import os
 import openai
-from datetime import datetime
-from supabase import create_client, Client
-from dotenv import load_dotenv
+from supabase import create_client
 
-load_dotenv()
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Load ENV variables
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-print(f"SUPABASE_URL: {SUPABASE_URL}")
-print(f"SUPABASE_KEY: {SUPABASE_KEY[:8]}")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+print("URL:", SUPABASE_URL)
+print("KEY:", SUPABASE_KEY[:6] + "...")
 
-def generate_ad(property_description):
-    prompt = f"Write a Facebook/Instagram-style real estate ad for this property:\n\n{property_description}"
-    
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a real estate ad writer."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-        max_tokens=250
-    )
+# Setup Supabase client
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    ad_text = response.choices[0].message.content.strip()
-    print("Generated Ad:", ad_text)
+# Setup OpenAI
+openai.api_key = OPENAI_API_KEY
 
-    print("Attempting Supabase insert...")
-    supabase.table("status_logs").insert({
-        "agent_name": "RetailBoost-AI",
-        "message": ad_text,
-        "timestamp": datetime.utcnow().isoformat()
-    }).execute()
-    print("Insert successful.")
+# Prompt and generate response
+prompt = "Charming 3-bedroom home with a fully remodeled kitchen, fenced yard, and walkable to top-rated schools."
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": prompt}]
+)
+message = response['choices'][0]['message']['content']
 
-    return ad_text
+# Log to Supabase
+supabase.table("status_logs").insert({
+    "agent_name": "RetailBoost-AI",
+    "message": message,
+    "timestamp": "now()"
+}).execute()
 
-
-# TEST EXECUTION: Optional
-if __name__ == "__main__":
-    test_prompt = "Charming 3-bedroom home with a fully remodeled kitchen, fenced yard, and walkable to top-rated schools."
-    generate_ad(test_prompt)
+print("✅ Log inserted:", message)
