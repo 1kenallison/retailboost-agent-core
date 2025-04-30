@@ -32,3 +32,9 @@ supabase.table("status_logs").insert({
 }).execute()
 
 print("✅ Log inserted:", message)
+
+import time
+
+while True:
+    print("Idle... waiting for trigger")
+    time.sleep(60)
